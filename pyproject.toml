@@ -1,0 +1,16 @@
+[project]
+name = "mosaic"
+version = "0.1.1"
+description = "Mosaic fork with fixed alphafold import paths"
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.hatch.build.targets.wheel.sources]
+"" = "mosaic"
