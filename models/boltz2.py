@@ -139,7 +139,7 @@ class Boltz2(StructurePredictionModel):
             deterministic=True,
         )
 
-    def build_multisample_loss(self, *, loss, features, recycling_steps=1, num_samples: int = 4, sampling_steps=None, reduction=jnp.mean):
+    def build_multisample_loss(self, *, loss, features, recycling_steps=1, num_samples: int = 4, sampling_steps=None, reduction=jnp.mean, initial_recycling_state=None):
         return MultiSampleBoltz2Loss(
             joltz2=self.model,
             features=features,
@@ -149,6 +149,7 @@ class Boltz2(StructurePredictionModel):
             deterministic=True,
             num_samples=num_samples,
             reduction=reduction,
+            initial_recycling_state=initial_recycling_state,
         )
 
 

@@ -18,7 +18,7 @@ from jaxtyping import Array, Float, PyTree
 from joltz import TrunkState
 
 
-from ..common import LinearCombination, LossTerm
+from ..common import LinearCombination, LossTerm, StateIndex
 from .structure_prediction import AbstractStructureOutput
 
 
@@ -528,11 +528,23 @@ class MultiSampleBoltz2Loss(LossTerm):
     name: str = "boltz2multi"
     initial_recycling_state: TrunkState | None = None
     reduction: any = jnp.mean
+    state_index: StateIndex | None = None
     """
         Run the structure and confidence modules multiple times from the same trunk output.
         When `reduction` is jnp.mean this is equivalent to the expected loss over multiple samples *assuming a deterministic trunk*, but faster.
         This will consume quite a bit of memory -- if you'd like to sacrifice some speed for memory, replace the vmap below with a jax.lax.map.
+
+        When `state_index` is set, the trunk_state from each forward pass is returned in aux
+        and can be used to update `initial_recycling_state` via the stateful loss mechanism
+        (update_loss_state=True in simplex_APGM). This enables rolling trunk updates where
+        each optimization step's trunk output becomes the next step's initial state.
     """
+
+    def update_state(self, trunk_state):
+        """Update initial_recycling_state with new trunk_state for rolling trunk refresh."""
+        return eqx.tree_at(
+            lambda m: m.initial_recycling_state, self, trunk_state
+        )
 
     def __call__(self, sequence: Float[Array, "N 20"], key=None):
         """Compute the loss for a given sequence."""
@@ -575,4 +587,10 @@ class MultiSampleBoltz2Loss(LossTerm):
             jax.random.split(key, self.num_samples)
         )
 
-        return self.reduction(vs), jax.tree.map(lambda v: list(jnp.sort(v)), auxs)
+        loss_aux = jax.tree.map(lambda v: list(jnp.sort(v)), auxs)
+
+        if self.state_index is not None:
+            trunk_update = (self.state_index, jax.lax.stop_gradient(output.trunk_state))
+            return self.reduction(vs), (loss_aux, trunk_update)
+        else:
+            return self.reduction(vs), loss_aux
