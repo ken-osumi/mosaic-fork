@@ -14,8 +14,8 @@
 
 """Feature pre-processing input pipeline for AlphaFold."""
 
-from mosaic.alphafold.model.tf import data_transforms
-from mosaic.alphafold.model.tf import shape_placeholders
+from alphafold.model.tf import data_transforms
+from alphafold.model.tf import shape_placeholders
 import tensorflow.compat.v1 as tf
 import tree
 
