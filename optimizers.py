@@ -367,6 +367,10 @@ def simplex_APGM(
         best_x = jax.nn.softmax(best_x)
 
     if trajectory_fn is None:
+        if update_loss_state:
+            return x, best_x, loss_function
         return x, best_x
     else:
+        if update_loss_state:
+            return x, best_x, trajectory, loss_function
         return x, best_x, trajectory
