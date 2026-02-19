@@ -123,7 +123,7 @@ def fetch_msa(sequence: str, cache_dir: str | None = None) -> str:
                             if member.name.endswith(".a3m"):
                                 f = tar.extractfile(member)
                                 if f:
-                                    a3m = f.read().decode("utf-8")
+                                    a3m = f.read().decode("utf-8").replace("\x00", "")
                                     print(f"MSA fetched: {len(a3m.splitlines()) // 2} sequences")
                                     if cache_dir:
                                         os.makedirs(cache_dir, exist_ok=True)
