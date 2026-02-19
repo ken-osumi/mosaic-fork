@@ -628,7 +628,7 @@ def set_binder_sequence(PSSM, features: dict, multimer: bool=True):
     # Only modify binder positions in msa_feat, preserving target MSA.
     # Binder has no MSA: zero all MSA rows at binder positions,
     # then inject soft sequence into query row (row 0).
-    msa_feat = features["msa_feat"]
+    msa_feat = jnp.asarray(features["msa_feat"])
     num_msa = msa_feat.shape[0]
 
     # Zero out binder columns across all MSA rows
