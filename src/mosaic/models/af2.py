@@ -283,19 +283,11 @@ def _combine_chain_msas(
 
     for a3m in chain_a3ms:
         msa_obj = parsers.parse_a3m(a3m)
-        L_chain = len(msa_obj.sequences[0])
-        # Filter sequences matching query length
-        valid = [i for i, s in enumerate(msa_obj.sequences) if len(s) == L_chain]
-        if len(valid) < len(msa_obj.sequences):
-            print(f"MSA: filtered {len(msa_obj.sequences) - len(valid)} seqs with mismatched length")
         msa_int = np.array(
-            [[HHBLITS_AA_TO_ID.get(r, 20) for r in msa_obj.sequences[i]] for i in valid],
+            [[HHBLITS_AA_TO_ID.get(r, 20) for r in seq] for seq in msa_obj.sequences],
             dtype=np.int32,
         )
-        del_mat = np.array(
-            [msa_obj.deletion_matrix[i] for i in valid],
-            dtype=np.int32,
-        )
+        del_mat = np.array(msa_obj.deletion_matrix, dtype=np.int32)
         all_chain_msa_int.append(msa_int)
         all_chain_del.append(del_mat)
 
